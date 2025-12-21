@@ -53,7 +53,7 @@ class AuthController extends Controller
     // LOGIN
     public function login(Request $request)
     {
-        try {
+         try {
             $request->validate([
                 'email' => 'required|email',
                 'password' => 'required'
@@ -74,8 +74,7 @@ class AuthController extends Controller
                     'message' => 'Please verify your email first'
                 ], 403);
             }
-
-            $token = $user->createToken('forum_token')->plainTextToken;
+             $token = $user->createToken('forum_token')->plainTextToken;
 
             return response()->json([
                 'success' => true,
@@ -94,11 +93,15 @@ class AuthController extends Controller
     // LOGOUT
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Logged out successfully'
-        ]);
+        try {
+            $request->user()->currentAccessToken()->delete();
+            return response()->json([
+                'message' => 'Logged out successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Logout failed'
+            ], 500);
+        }
     }
 }
