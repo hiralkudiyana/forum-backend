@@ -1,31 +1,69 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use App\Models\User;
+
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PasswordResetController;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Support\Facades\Route;
-use App\Models\User;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\Admin\CategoryController;
+use App\Http\Controllers\Api\CategoryPublicController;
 
-
-// Protecte Route
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'show']);
-    Route::post('/profile', [ProfileController::class, 'update']);
-});
-
-Route::middleware(['auth:sanctum', 'admin'])->group(function () {
-    Route::get('/admin/dashboard', fn () => response()->json(['ok' => true]));
-});
-
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
 Route::post('/reset-password', [PasswordResetController::class, 'reset']);
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+Route::get('/categories', [CategoryPublicController::class, 'index']);
 
+
+/*
+|--------------------------------------------------------------------------
+| Protected User Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::post('/profile', [ProfileController::class, 'update']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Admin Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
+
+    Route::get('/dashboard', function () {
+        return response()->json(['ok' => true]);
+    });
+
+    Route::get('/users', [UserController::class, 'index']);
+    
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+    Route::get('/categories', [CategoryController::class, 'index']);
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+
+});
+
+/*
+|--------------------------------------------------------------------------
+| Email Verification
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
 
