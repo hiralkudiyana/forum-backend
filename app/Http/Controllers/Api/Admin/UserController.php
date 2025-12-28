@@ -12,7 +12,7 @@ class UserController extends Controller
     {
         try {
             $users = User::where('role', 'user')
-                ->select('id', 'name', 'email','type' ,'city','short_bio','created_at')
+                ->select('id', 'name', 'email','type' ,'city','short_bio','created_at','is_banned')
                 ->orderBy('id', 'desc')
                 ->get();
 
@@ -58,6 +58,49 @@ class UserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete user'
+            ], 500);
+        }
+    }
+    public function ban($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            if ($user->role === 'admin') {
+                return response()->json([
+                    'message' => 'Admin cannot be banned'
+                ], 403);
+            }
+
+            $user->update(['is_banned' => true]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User banned successfully'
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to ban user'
+            ], 500);
+        }
+    }
+
+    public function unban($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            $user->update(['is_banned' => false]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User unbanned successfully'
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to unban user'
             ], 500);
         }
     }

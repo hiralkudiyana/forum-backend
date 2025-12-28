@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\CategoryController;
 use App\Http\Controllers\Api\CategoryPublicController;
+use App\Http\Controllers\Api\Admin\PostController;
+use App\Http\Controllers\Api\ForumController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +24,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
 Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 Route::get('/categories', [CategoryPublicController::class, 'index']);
+Route::get('/categories', [ForumController::class, 'categoriesWithPosts']);
 
 
 /*
@@ -52,10 +55,17 @@ Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    Route::patch('/users/{id}/ban', [UserController::class, 'ban']);
+    Route::patch('/users/{id}/unban', [UserController::class, 'unban']);
 
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::post('/categories', [CategoryController::class, 'store']);
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy']);
+
+    Route::get('/posts', [PostController::class, 'index']);
+    Route::post('/posts', [PostController::class, 'store']);
+    Route::put('/posts/{id}', [PostController::class, 'update']);  
+    Route::delete('/posts/{id}', [PostController::class, 'destroy']);
 
 });
 
